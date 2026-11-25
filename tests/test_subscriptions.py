@@ -55,3 +55,27 @@ def test_abonelik_yoksa_ozet_sifir_doner():
     data = client.get("/subscriptions/summary").json()
     assert data["monthly_total"] == 0
     assert data["subscription_count"] == 0
+
+
+def test_yaklasan_sadece_istenen_gun_icindekileri_dondurur():
+    ekle(name="Yakin", gun=3)
+    ekle(name="Uzak", gun=30)
+    response = client.get("/upcoming?days=7")
+    assert response.status_code == 200
+    assert [s["name"] for s in response.json()] == ["Yakin"]
+
+
+def test_yaklasan_tarihe_gore_siralidir():
+    ekle(name="Gec", gun=6)
+    ekle(name="Erken", gun=2)
+    names = [s["name"] for s in client.get("/upcoming?days=7").json()]
+    assert names == ["Erken", "Gec"]
+
+
+def test_suresi_gecmis_abonelik_listelenmez():
+    ekle(name="Gecmis", gun=-2)
+    assert client.get("/upcoming?days=7").json() == []
+
+
+def test_gecersiz_gun_degeri_422_doner():
+    assert client.get("/upcoming?days=0").status_code == 422

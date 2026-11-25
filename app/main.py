@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, timedelta
 from enum import Enum
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="Abonelik Avcısı")
@@ -55,3 +55,11 @@ def summary():
         "monthly_total": round(monthly_total, 2),
         "yearly_total": round(monthly_total * 12, 2),
     }
+
+
+@app.get("/upcoming", response_model=list[Subscription])
+def upcoming(days: int = Query(7, ge=1, le=365)):
+    today = date.today()
+    limit = today + timedelta(days=days)
+    result = [s for s in subscriptions if today <= s.next_renewal <= limit]
+    return sorted(result, key=lambda s: s.next_renewal)
