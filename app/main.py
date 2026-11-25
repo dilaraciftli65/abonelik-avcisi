@@ -4,6 +4,10 @@ from enum import Enum
 from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
 
+from pathlib import Path
+
+from fastapi.responses import FileResponse, RedirectResponse
+
 app = FastAPI(title="Abonelik Avcısı")
 
 
@@ -27,9 +31,9 @@ class Subscription(SubscriptionIn):
 subscriptions: list[Subscription] = []
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
-    return {"mesaj": "Abonelik Avcısı çalışıyor"}
+    return RedirectResponse(url="/ui")
 
 
 @app.post("/subscriptions", response_model=Subscription, status_code=201)
@@ -63,3 +67,8 @@ def upcoming(days: int = Query(7, ge=1, le=365)):
     limit = today + timedelta(days=days)
     result = [s for s in subscriptions if today <= s.next_renewal <= limit]
     return sorted(result, key=lambda s: s.next_renewal)
+
+
+@app.get("/ui", include_in_schema=False)
+def ui():
+    return FileResponse(Path(__file__).parent / "static" / "index.html")

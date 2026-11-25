@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abonelik Avcısı</title>
+  <style>
+    :root {
+      --mor: #7c3aed;
+      --mor-acik: #ede9fe;
+      --yesil: #059669;
+      --turuncu: #ea580c;
+      --gri: #64748b;
+      --arka: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      background: var(--arka);
+      color: #1e293b;
+    }
+
+    h1 {
+      margin: 0;
+      background: linear-gradient(90deg, var(--mor), var(--turuncu));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 2.2rem;
+    }
+
+    .alt {
+      color: var(--gri);
+      margin-top: .3rem;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.15rem;
+      color: var(--mor);
+    }
+
+    input,
+    select,
+    button {
+      padding: .55rem .7rem;
+      margin: .25rem .2rem;
+      font-size: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+
+    button {
+      background: var(--mor);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform .1s, background .2s;
+    }
+
+    button:hover {
+      background: #6d28d9;
+      transform: translateY(-1px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: .6rem;
+    }
+
+    th {
+      background: var(--mor-acik);
+      color: var(--mor);
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: .55rem .6rem;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    tr:hover td {
+      background: #faf5ff;
+    }
+
+    .kartlar {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .kart {
+      flex: 1;
+      min-width: 170px;
+      border-radius: 12px;
+      padding: 1rem;
+      color: #fff;
+      text-align: center;
+    }
+
+    .kart b {
+      display: block;
+      font-size: 1.8rem;
+    }
+
+    .k1 {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    }
+
+    .k2 {
+      background: linear-gradient(135deg, #059669, #34d399);
+    }
+
+    .k3 {
+      background: linear-gradient(135deg, #ea580c, #fb923c);
+    }
+
+    .hata {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .bos {
+      color: var(--gri);
+      font-style: italic;
+    }
+
+    .alan {
+      display: inline-block;
+      vertical-align: top;
+      margin: .2rem .6rem .4rem 0;
+    }
+
+    .alan input,
+    .alan select {
+      margin: 0;
+    }
+
+    .aciklama {
+      display: block;
+      color: var(--gri);
+      font-size: .8rem;
+      margin-top: .3rem;
+      max-width: 220px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Abonelik Avcısı</h1>
+  <p class="alt">Aboneliklerini ekle, toplam maliyetini gör, yaklaşan yenilemeleri takip et.</p>
+
+  <section>
+    <h2>Yeni abonelik</h2>
+    <form id="form">
+      <div class="alan">
+        <input id="name" placeholder="Ad (örn. Netflix)" required>
+        <small class="aciklama">Aboneliğin adı. Listede bu isimle görünür.</small>
+      </div>
+      <div class="alan">
+        <input id="price" type="number" step="0.01" min="0.01" placeholder="Fiyat" required>
+        <small class="aciklama">Her ödemede çekilen tutar (TL).</small>
+      </div>
+      <div class="alan">
+        <select id="cycle">
+          <option value="monthly">Aylık</option>
+          <option value="yearly">Yıllık</option>
+        </select>
+        <small class="aciklama">Aylık: her ay ödenir. Yıllık: yılda bir ödenir, özette 12'ye bölünür.</small>
+      </div>
+      <div class="alan">
+        <input id="renewal" placeholder="GG/AA/YYYY" pattern="\d{1,2}/\d{1,2}/\d{4}" required>
+        <small class="aciklama">Bir sonraki ödeme günü. Örnek: 28/11/2026</small>
+      </div>
+      <div class="alan">
+        <button>Ekle</button>
+      </div>
+    </form>
+    <p id="mesaj" class="hata"></p>
+  </section>
+
+  <section>
+    <h2>Özet</h2>
+    <div class="kartlar">
+      <div class="kart k1"><b id="sayi">0</b>abonelik</div>
+      <div class="kart k2"><b id="aylik">0</b>TL aylık toplam</div>
+      <div class="kart k3"><b id="yillik">0</b>TL yıllık toplam</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Yaklaşan yenilemeler</h2>
+    <label>Önümüzdeki <input id="gun" type="number" value="7" min="1" max="365" style="width:70px"> gün</label>
+    <button id="yenile-btn">Göster</button>
+    <small class="aciklama">Bugünden itibaren bu kadar gün içinde ödemesi olacak abonelikleri gösterir. Örnek: 7
+      yazarsan önümüzdeki bir hafta.</small>
+    <table>
+      <tbody id="yaklasan"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Tüm abonelikler</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Ad</th>
+          <th>Fiyat</th>
+          <th>Döngü</th>
+          <th>Yenilenme</th>
+        </tr>
+      </thead>
+      <tbody id="liste"></tbody>
+    </table>
+  </section>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const cycleTR = { monthly: "Aylık", yearly: "Yıllık" };
+
+    const esc = s => String(s).replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+    // Sunucudan gelen 2026-11-28 biçimini ekranda 28/11/2026 yapar
+    const trTarih = iso => {
+      const [y, a, g] = iso.split("-");
+      return `${g}/${a}/${y}`;
+    };
+
+    // Kullanıcının yazdığı 28/11/2026 (veya 28.11.2026) metnini 2026-11-28 yapar
+    // Geçersiz bir tarihse null döner
+    const isoTarih = metin => {
+      const m = metin.trim().match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+      if (!m) return null;
+      const [, g, a, y] = m;
+      const d = new Date(+y, +a - 1, +g);
+      if (d.getFullYear() !== +y || d.getMonth() !== +a - 1 || d.getDate() !== +g) return null;
+      return `${y}-${a.padStart(2, "0")}-${g.padStart(2, "0")}`;
+    };
+
+    async function yukle() {
+      const [liste, ozet] = await Promise.all([
+        fetch("/subscriptions").then(r => r.json()),
+        fetch("/subscriptions/summary").then(r => r.json()),
+      ]);
+      $("liste").innerHTML = liste.map(s =>
+        `<tr><td>${esc(s.name)}</td><td>${s.price} TL</td><td>${cycleTR[s.billing_cycle]}</td><td>${trTarih(s.next_renewal)}</td></tr>`
+      ).join("") || `<tr><td class="bos" colspan="4">Henüz abonelik yok</td></tr>`;
+      $("sayi").textContent = ozet.subscription_count;
+      $("aylik").textContent = ozet.monthly_total;
+      $("yillik").textContent = ozet.yearly_total;
+      yaklasanGetir();
+    }
+
+    async function yaklasanGetir() {
+      const r = await fetch(`/upcoming?days=${$("gun").value}`);
+      if (!r.ok) {
+        $("yaklasan").innerHTML = `<tr><td class="hata">Gün sayısı 1 ile 365 arasında olmalı</td></tr>`;
+        return;
+      }
+      const liste = await r.json();
+      $("yaklasan").innerHTML = liste.map(s =>
+        `<tr><td>${esc(s.name)}</td><td>${trTarih(s.next_renewal)}</td></tr>`
+      ).join("") || `<tr><td class="bos" colspan="2">Bu aralıkta yenileme yok</td></tr>`;
+    }
+
+    $("form").addEventListener("submit", async e => {
+      e.preventDefault();
+      $("mesaj").textContent = "";
+
+      const iso = isoTarih($("renewal").value);
+      if (!iso) {
+        $("mesaj").textContent = "Tarihi GG/AA/YYYY biçiminde ve geçerli bir gün olacak şekilde yaz (örn. 28/11/2026).";
+        return;
+      }
+
+      const veri = {
+        name: $("name").value,
+        price: parseFloat($("price").value),
+        billing_cycle: $("cycle").value,
+        next_renewal: iso,
+      };
+      const r = await fetch("/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(veri),
+      });
+      if (!r.ok) {
+        $("mesaj").textContent = "Kayıt eklenemedi, bilgileri kontrol et.";
+        return;
+      }
+      e.target.reset();
+      yukle();
+    });
+
+    $("yenile-btn").addEventListener("click", yaklasanGetir);
+    yukle();
+  </script>
+</body>
+
+</html>

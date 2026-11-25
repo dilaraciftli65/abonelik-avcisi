@@ -79,3 +79,9 @@ def test_suresi_gecmis_abonelik_listelenmez():
 
 def test_gecersiz_gun_degeri_422_doner():
     assert client.get("/upcoming?days=0").status_code == 422
+
+
+def test_arayuz_sayfasi_acilir():
+    response = client.get("/ui")
+    assert response.status_code == 200
+    assert "Abonelik Avcısı" in response.text
